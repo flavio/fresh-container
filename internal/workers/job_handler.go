@@ -1,7 +1,6 @@
 package workers
 
 import (
-	types "github.com/flavio/stale-container/internal/common"
 	"github.com/flavio/stale-container/pkg/stale_container"
 
 	"context"
@@ -55,7 +54,7 @@ func (w *BackgroundWorker) ProcessJob(ctx context.Context, id, img, constraint s
 		}).Debug("worker.ProcessJob")
 	}
 
-	nextVersion, err := image.EvalUpgrade(constraint)
+	evaluation, err := image.EvalUpgrade(constraint)
 	if err != nil {
 		log.WithFields(log.Fields{
 			"id":         id,
@@ -66,8 +65,7 @@ func (w *BackgroundWorker) ProcessJob(ctx context.Context, id, img, constraint s
 		return err
 	}
 
-	result := types.NewCheckResponse(image, constraint, nextVersion)
-	encodedResult, err := json.Marshal(result)
+	encodedResult, err := json.Marshal(evaluation)
 	if err != nil {
 		log.WithFields(log.Fields{
 			"id":         id,

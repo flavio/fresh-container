@@ -80,10 +80,16 @@ $ stale-container check --constraint ">= 1.5.0 < 1.6.0" "influxdb:1.5.0"
 						Required: true,
 					},
 					&cli.StringFlag{
+						Name:    "server",
+						Aliases: []string{"s"},
+						Usage:   "Use remote stale-container server to perform check",
+						EnvVars: []string{"STALE_SERVER"},
+					},
+					&cli.StringFlag{
 						Name:    "output",
 						Aliases: []string{"o"},
 						Usage:   "Output format (json,text)",
-						EnvVars: []string{"STALE_CONSTRAINT"},
+						EnvVars: []string{"STALE_OUTPUT"},
 						Value:   "text",
 					},
 				},

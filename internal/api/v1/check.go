@@ -6,7 +6,6 @@ import (
 	"net/http"
 
 	"github.com/blang/semver"
-	"github.com/flavio/stale-container/internal/common"
 	"github.com/flavio/stale-container/pkg/stale_container"
 	"github.com/gorilla/mux"
 	log "github.com/sirupsen/logrus"
@@ -56,17 +55,15 @@ func (a *ApiServer) Check(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	nextTagVersion, err := image.EvalUpgrade(vars["constraint"])
+	evaluation, err := image.EvalUpgrade(vars["constraint"])
 	if err = image.SetTagVersions(tags, true); err != nil {
 		ServeErrorAsJSON(w, http.StatusInternalServerError, err)
 		return
 	}
 
-	res := types.NewCheckResponse(image, vars["constraint"], nextTagVersion)
-
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(res)
+	json.NewEncoder(w).Encode(evaluation)
 }
 
 func serveJobAcceptedResponse(jobId string, w http.ResponseWriter) {

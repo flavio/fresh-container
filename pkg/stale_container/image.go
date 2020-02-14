@@ -20,6 +20,14 @@ type Image struct {
 	TagVersions semver.Versions
 }
 
+type ImageUpgradeEvaluationResponse struct {
+	Image          string `json:"image"`
+	Constraint     string `json:"constraint"`
+	CurrentVersion string `json:"current_version"`
+	NextVersion    string `json:"next_version"`
+	Stale          bool   `json:"stale"`
+}
+
 func NewImage(image string) (Image, error) {
 	img, err := registry.ParseImage(image)
 
@@ -72,17 +80,25 @@ func (image *Image) FullNameWithoutTag() string {
 	return fmt.Sprintf("%s/%s", image.Domain, image.Path)
 }
 
-func (image *Image) EvalUpgrade(constraint string) (semver.Version, error) {
+func (image *Image) EvalUpgrade(constraint string) (ImageUpgradeEvaluationResponse, error) {
 	constraintRange, err := semver.ParseRange(constraint)
 	if err != nil {
-		return semver.Version{}, err
+		return ImageUpgradeEvaluationResponse{}, err
 	}
 
-	return NextVersion(
+	nextVer := NextVersion(
 		image.TagVersion,
 		constraintRange,
 		image.TagVersions,
-	), nil
+	)
+
+	return ImageUpgradeEvaluationResponse{
+		Image:          image.FullNameWithoutTag(),
+		Constraint:     constraint,
+		Stale:          nextVer.GT(image.TagVersion),
+		CurrentVersion: image.Tag,
+		NextVersion:    nextVer.String(),
+	}, nil
 }
 
 func createRegistryClient(ctx context.Context, domain string, config *config.Config) (*registry.Registry, error) {
