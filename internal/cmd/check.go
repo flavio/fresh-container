@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/flavio/stale-container/internal/config"
 	"github.com/flavio/stale-container/pkg/stale_container"
@@ -59,6 +60,11 @@ func CheckImage(c *cli.Context) error {
 		if c.String("config") != "" {
 			log.Warn("`config` flag is ignored when the `server` is used at the same time")
 		}
+		evaluation, err = remoteEvaluation(
+			c.String("server"),
+			c.Args().Get(0),
+			constraint,
+			output != "json")
 	}
 	if err != nil {
 		return cli.NewExitError(err, 1)
@@ -111,4 +117,36 @@ func localEvaluation(image, constraint, configFile string, ctx context.Context) 
 	}
 
 	return img.EvalUpgrade(constraint)
+}
+
+func remoteEvaluation(server, image, constraint string, showProgress bool) (evaluation stale_container.ImageUpgradeEvaluationResponse, err error) {
+	client := stale_container.NewClient(server)
+	remoteEval, err := client.EvalUpgrade(image, constraint)
+	if err != nil {
+		return
+	}
+
+	ready, err := remoteEval.IsReady()
+	if !ready && showProgress {
+		fmt.Printf("Waiting for remote evaluation from %s: .", server)
+	}
+
+	for {
+		time.Sleep(1 * time.Second)
+		ready, err = remoteEval.IsReady()
+		if err != nil {
+			return
+		}
+
+		if ready {
+			if showProgress {
+				fmt.Print("\n")
+			}
+			break
+		} else if showProgress {
+			fmt.Print(".")
+		}
+	}
+
+	return remoteEval.Response, nil
 }
