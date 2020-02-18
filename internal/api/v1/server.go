@@ -45,10 +45,12 @@ func (a *ApiServer) ListenAndServe() error {
 
 func (a *ApiServer) initRoutes() {
 	a.router.
-		Path("/api/v1/check/{image}").
+		Path("/api/v1/check").
 		Methods("GET").
-		Queries("constraint", "{constraint}").
-		HandlerFunc(a.Check)
+		Queries(
+			"image", "{image}",
+			"constraint", "{constraint}",
+		).HandlerFunc(a.Check)
 
 	a.router.
 		Path("/api/v1/jobs/{id}").

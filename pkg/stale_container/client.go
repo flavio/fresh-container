@@ -26,8 +26,9 @@ func (c *Client) EvalUpgrade(image, constraint string) (RemoteEvaluationResponse
 		return RemoteEvaluationResponse{}, err
 	}
 
-	u.Path = fmt.Sprintf("/api/v1/check/%s", image)
+	u.Path = "/api/v1/check"
 	q := u.Query()
+	q.Add("image", image)
 	q.Add("constraint", constraint)
 	u.RawQuery = q.Encode()
 
