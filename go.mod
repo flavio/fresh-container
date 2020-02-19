@@ -1,4 +1,4 @@
-module github.com/flavio/stale-container
+module github.com/flavio/fresh-container
 
 go 1.12
 

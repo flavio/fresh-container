@@ -29,23 +29,23 @@ CLOSEST_TAG   ?= $(shell git describe --tags)
 # It accepts tags of type `vX.Y.Z`, `vX.Y.Z-(alpha|beta|rc|...)` and produces X.Y.Z
 VERSION       := $(shell echo $(CLOSEST_TAG) | sed -E 's/v(([0-9]\.?)+).*/\1/')
 TAGS          := development
-PROJECT_PATH  := github.com/flavio/stale-container
-STALE_CONTAINER_MONITOR_LDFLAGS  = -ldflags "-X=$(PROJECT_PATH)/pkg/stale_container.Version=$(VERSION) \
-                           -X=$(PROJECT_PATH)/pkg/stale_container.BuildDate=$(BUILD_DATE) \
-                           -X=$(PROJECT_PATH)/pkg/stale_container.Tag=$(TAG) \
-                           -X=$(PROJECT_PATH)/pkg/stale_container.ClosestTag=$(CLOSEST_TAG)"
+PROJECT_PATH  := github.com/flavio/fresh-container
+FRESH_CONTAINER_MONITOR_LDFLAGS  = -ldflags "-X=$(PROJECT_PATH)/pkg/fresh_container.Version=$(VERSION) \
+                           -X=$(PROJECT_PATH)/pkg/fresh_container.BuildDate=$(BUILD_DATE) \
+                           -X=$(PROJECT_PATH)/pkg/fresh_container.Tag=$(TAG) \
+                           -X=$(PROJECT_PATH)/pkg/fresh_container.ClosestTag=$(CLOSEST_TAG)"
 
-STALE_CONTAINER_MONITOR_DIRS = cmd pkg internal
+FRESH_CONTAINER_MONITOR_DIRS = cmd pkg internal
 
 # go source files, ignore vendor directory
-STALE_CONTAINER_MONITOR_SRCS = $(shell find $(STALE_CONTAINER_MONITOR_DIRS) -type f -name '*.go')
+FRESH_CONTAINER_MONITOR_SRCS = $(shell find $(FRESH_CONTAINER_MONITOR_DIRS) -type f -name '*.go')
 
 .PHONY: all
 all: install
 
 .PHONY: build
 build: go-version-check
-	$(GO) build $(GOMODFLAG) $(STALE_CONTAINER_MONITOR_LDFLAGS) -tags $(TAGS) ./cmd/...
+	$(GO) build $(GOMODFLAG) $(FRESH_CONTAINER_MONITOR_LDFLAGS) -tags $(TAGS) ./cmd/...
 
 MANPAGES_MD := $(wildcard docs/man/*.md)
 MANPAGES    := $(MANPAGES_MD:%.md=%)
@@ -58,12 +58,12 @@ docs: $(MANPAGES)
 
 .PHONY: install
 install: go-version-check
-	$(GO) install $(GOMODFLAG) $(STALE_CONTAINER_MONITOR_LDFLAGS) -tags $(TAGS) ./cmd/...
+	$(GO) install $(GOMODFLAG) $(FRESH_CONTAINER_MONITOR_LDFLAGS) -tags $(TAGS) ./cmd/...
 
 .PHONY: clean
 clean:
 	$(GO) clean -i ./...
-	$(RM) -f ./stale-container
+	$(RM) -f ./fresh-container
 	$(RM) -rf $(BINPATH)
 
 .PHONY: distclean
@@ -90,7 +90,7 @@ lint: deps
 	# run go vet
 	$(GO) vet ./...
 	# run go gmt
-	test -z `$(GOFMT) -l $(STALE_CONTAINER_MONITOR_SRCS)` || { $(GOFMT) -d $(STALE_CONTAINER_MONITOR_SRCS) && false; }
+	test -z `$(GOFMT) -l $(FRESH_CONTAINER_MONITOR_SRCS)` || { $(GOFMT) -d $(FRESH_CONTAINER_MONITOR_SRCS) && false; }
 	# run golangci-lint
 	$(BINPATH)/golangci-lint run --verbose --timeout=3m
 

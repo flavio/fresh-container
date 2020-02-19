@@ -1,4 +1,4 @@
-package stale_container
+package fresh_container
 
 import (
 	"github.com/blang/semver"

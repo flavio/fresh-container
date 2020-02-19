@@ -6,9 +6,9 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/flavio/stale-container/internal/config"
-	"github.com/flavio/stale-container/internal/db"
-	"github.com/flavio/stale-container/internal/workers"
+	"github.com/flavio/fresh-container/internal/config"
+	"github.com/flavio/fresh-container/internal/db"
+	"github.com/flavio/fresh-container/internal/workers"
 
 	gorilla_handlers "github.com/gorilla/handlers"
 	"github.com/gorilla/mux"

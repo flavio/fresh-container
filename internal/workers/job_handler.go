@@ -1,7 +1,7 @@
 package workers
 
 import (
-	"github.com/flavio/stale-container/pkg/stale_container"
+	"github.com/flavio/fresh-container/pkg/fresh_container"
 
 	"context"
 	"encoding/json"
@@ -9,7 +9,7 @@ import (
 )
 
 func (w *BackgroundWorker) ProcessJob(ctx context.Context, id, img, constraint string) error {
-	image, err := stale_container.NewImage(img)
+	image, err := fresh_container.NewImage(img)
 	if err != nil {
 		log.WithFields(log.Fields{
 			"id":         id,

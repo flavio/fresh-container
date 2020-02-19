@@ -3,8 +3,8 @@ package workers
 import (
 	"context"
 
-	"github.com/flavio/stale-container/internal/config"
-	"github.com/flavio/stale-container/internal/db"
+	"github.com/flavio/fresh-container/internal/config"
+	"github.com/flavio/fresh-container/internal/db"
 
 	"github.com/google/uuid"
 	"github.com/vmihailenco/taskq/v2"

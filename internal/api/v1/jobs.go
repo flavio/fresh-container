@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/flavio/stale-container/internal/db"
+	"github.com/flavio/fresh-container/internal/db"
 	"github.com/gorilla/mux"
 	log "github.com/sirupsen/logrus"
 )

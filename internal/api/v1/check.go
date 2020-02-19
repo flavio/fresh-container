@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	"github.com/blang/semver"
-	"github.com/flavio/stale-container/pkg/stale_container"
+	"github.com/flavio/fresh-container/pkg/fresh_container"
 	"github.com/gorilla/mux"
 	log "github.com/sirupsen/logrus"
 )
@@ -20,7 +20,7 @@ func (a *ApiServer) Check(w http.ResponseWriter, r *http.Request) {
 		"host":       r.Host,
 	}).Debug("GET check")
 
-	image, err := stale_container.NewImage(vars["image"])
+	image, err := fresh_container.NewImage(vars["image"])
 	if err != nil {
 		ServeErrorAsJSON(w, http.StatusBadRequest, err)
 		return

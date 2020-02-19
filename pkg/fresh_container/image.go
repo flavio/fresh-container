@@ -1,4 +1,4 @@
-package stale_container
+package fresh_container
 
 import (
 	"context"
@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/blang/semver"
-	"github.com/flavio/stale-container/internal/config"
+	"github.com/flavio/fresh-container/internal/config"
 	"github.com/genuinetools/reg/registry"
 	"github.com/genuinetools/reg/repoutils"
 )

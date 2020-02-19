@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	"github.com/flavio/stale-container/internal/cmd"
+	"github.com/flavio/fresh-container/internal/cmd"
 
 	"github.com/urfave/cli/v2"
 )
@@ -12,7 +12,7 @@ const VERSION = "0.1.0"
 
 func main() {
 	app := &cli.App{
-		Name:    "stale-container",
+		Name:    "fresh-container",
 		Usage:   "Tool to find stale containers",
 		Version: VERSION,
 		Flags: []cli.Flag{
@@ -21,13 +21,13 @@ func main() {
 				Aliases: []string{"c"},
 				Value:   "",
 				Usage:   "Configuration file",
-				EnvVars: []string{"STALE_CONFIG_FILE"},
+				EnvVars: []string{"FRESH_CONTAINER_CONFIG_FILE"},
 			},
 			&cli.BoolFlag{
 				Name:    "debug",
 				Aliases: []string{"d"},
 				Usage:   "Enable extra debugging",
-				EnvVars: []string{"STALE_DEBUG"},
+				EnvVars: []string{"FRESH_CONTAINER_DEBUG"},
 			},
 		},
 		Commands: []*cli.Command{
@@ -68,28 +68,28 @@ Ranges can be combined by both AND and OR
 
 Example:
 
-$ stale-container check --constraint ">= 1.5.0 < 1.6.0" "influxdb:1.5.0"
+$ fresh-container check --constraint ">= 1.5.0 < 1.6.0" "influxdb:1.5.0"
 `,
-				UsageText: "stale-container check --constraint <STALE_CONSTRAINT> <IMAGE>",
+				UsageText: "fresh-container check --constraint <FRESH_CONTAINER_CONSTRAINT> <IMAGE>",
 				Action:    cmd.CheckImage,
 				Flags: []cli.Flag{
 					&cli.StringFlag{
 						Name:     "constraint",
 						Usage:    "Expiration constraint - must follow semver rules",
-						EnvVars:  []string{"STALE_CONSTRAINT"},
+						EnvVars:  []string{"FRESH_CONTAINER_CONSTRAINT"},
 						Required: true,
 					},
 					&cli.StringFlag{
 						Name:    "server",
 						Aliases: []string{"s"},
-						Usage:   "Use remote stale-container server to perform check",
-						EnvVars: []string{"STALE_SERVER"},
+						Usage:   "Use remote fresh-container server to perform check",
+						EnvVars: []string{"FRESH_CONTAINER_SERVER"},
 					},
 					&cli.StringFlag{
 						Name:    "output",
 						Aliases: []string{"o"},
 						Usage:   "Output format (json,text)",
-						EnvVars: []string{"STALE_OUTPUT"},
+						EnvVars: []string{"FRESH_CONTAINER_OUTPUT"},
 						Value:   "text",
 					},
 				},
@@ -98,7 +98,7 @@ $ stale-container check --constraint ">= 1.5.0 < 1.6.0" "influxdb:1.5.0"
 				Name:        "server",
 				Usage:       "Run a simple REST API",
 				Description: "Run simple web server that can be used to find stale containers",
-				UsageText:   "stale-container server --port <STALE_PORT>",
+				UsageText:   "fresh-container server --port <FRESH_CONTAINER_PORT>",
 				Action:      cmd.RunServer,
 				Flags: []cli.Flag{
 					&cli.IntFlag{
@@ -106,7 +106,7 @@ $ stale-container check --constraint ">= 1.5.0 < 1.6.0" "influxdb:1.5.0"
 						Aliases: []string{"p"},
 						Value:   5000,
 						Usage:   "Listen to port",
-						EnvVars: []string{"STALE_PORT"},
+						EnvVars: []string{"FRESH_CONTAINER_PORT"},
 					},
 				},
 			},

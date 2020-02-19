@@ -1,7 +1,7 @@
 package db
 
 import (
-	"github.com/flavio/stale-container/internal/config"
+	"github.com/flavio/fresh-container/internal/config"
 
 	badger "github.com/dgraph-io/badger/v2"
 	"github.com/pkg/errors"

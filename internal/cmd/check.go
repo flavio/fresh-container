@@ -7,8 +7,8 @@ import (
 	"os"
 	"time"
 
-	"github.com/flavio/stale-container/internal/config"
-	"github.com/flavio/stale-container/pkg/stale_container"
+	"github.com/flavio/fresh-container/internal/config"
+	"github.com/flavio/fresh-container/pkg/fresh_container"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
@@ -30,7 +30,7 @@ func isOutputFormatValid(format string) bool {
 
 func CheckImage(c *cli.Context) error {
 	var err error
-	var evaluation stale_container.ImageUpgradeEvaluationResponse
+	var evaluation fresh_container.ImageUpgradeEvaluationResponse
 	constraint := c.String("constraint")
 
 	if c.NArg() != 1 {
@@ -97,7 +97,7 @@ func CheckImage(c *cli.Context) error {
 	return nil
 }
 
-func localEvaluation(image, constraint, configFile string, ctx context.Context) (evaluation stale_container.ImageUpgradeEvaluationResponse, err error) {
+func localEvaluation(image, constraint, configFile string, ctx context.Context) (evaluation fresh_container.ImageUpgradeEvaluationResponse, err error) {
 	cfg := config.NewConfig()
 	if configFile != "" {
 		cfg, err = config.NewFromFile(configFile)
@@ -106,7 +106,7 @@ func localEvaluation(image, constraint, configFile string, ctx context.Context) 
 		}
 	}
 
-	img, err := stale_container.NewImage(image)
+	img, err := fresh_container.NewImage(image)
 	if err != nil {
 		return
 	}
@@ -119,8 +119,8 @@ func localEvaluation(image, constraint, configFile string, ctx context.Context) 
 	return img.EvalUpgrade(constraint)
 }
 
-func remoteEvaluation(server, image, constraint string, showProgress bool) (evaluation stale_container.ImageUpgradeEvaluationResponse, err error) {
-	client := stale_container.NewClient(server)
+func remoteEvaluation(server, image, constraint string, showProgress bool) (evaluation fresh_container.ImageUpgradeEvaluationResponse, err error) {
+	client := fresh_container.NewClient(server)
 	remoteEval, err := client.EvalUpgrade(image, constraint)
 	if err != nil {
 		return

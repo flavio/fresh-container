@@ -4,13 +4,13 @@ import (
 	"encoding/json"
 	"time"
 
-	"github.com/flavio/stale-container/pkg/stale_container"
+	"github.com/flavio/fresh-container/pkg/fresh_container"
 
 	badger "github.com/dgraph-io/badger/v2"
 	log "github.com/sirupsen/logrus"
 )
 
-func (d *DB) GetImageTags(image stale_container.Image) ([]string, error) {
+func (d *DB) GetImageTags(image fresh_container.Image) ([]string, error) {
 	var tags []string
 
 	err := d.db.View(func(txn *badger.Txn) error {
@@ -42,7 +42,7 @@ func (d *DB) GetImageTags(image stale_container.Image) ([]string, error) {
 	return tags, nil
 }
 
-func (d *DB) SetImageTags(image stale_container.Image, tags []string) error {
+func (d *DB) SetImageTags(image fresh_container.Image, tags []string) error {
 	marshalledTags, err := json.Marshal(tags)
 	if err != nil {
 		log.WithFields(log.Fields{

@@ -6,10 +6,10 @@ import (
 	"syscall"
 	"time"
 
-	api "github.com/flavio/stale-container/internal/api/v1"
-	"github.com/flavio/stale-container/internal/config"
-	"github.com/flavio/stale-container/internal/db"
-	"github.com/flavio/stale-container/internal/workers"
+	api "github.com/flavio/fresh-container/internal/api/v1"
+	"github.com/flavio/fresh-container/internal/config"
+	"github.com/flavio/fresh-container/internal/db"
+	"github.com/flavio/fresh-container/internal/workers"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
