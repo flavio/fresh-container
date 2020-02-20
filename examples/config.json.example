@@ -1,0 +1,12 @@
+{
+  "cache_ttl_hours": 5,
+  registries: [
+    "secure.local.lan": {
+      "username": "user",
+      "password": "this is a secure password"
+    },
+    "insecure.local.lan": {
+      "non_ssl": "true"
+    }
+  ]
+}
