@@ -61,6 +61,11 @@ func (a *ApiServer) initRoutes() {
 		Path("/api/v1/evaluations/{id}").
 		Methods("GET").
 		HandlerFunc(a.GetEvaluation)
+
+	a.router.
+		Path("/healthz").
+		Methods("GET").
+		HandlerFunc(a.GetHealthz)
 }
 
 func ServeErrorAsJSON(w http.ResponseWriter, statusCode int, err error) error {
