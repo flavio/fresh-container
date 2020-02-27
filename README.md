@@ -1,6 +1,4 @@
-# Fresh Container
-
-## The goal of the tool
+# The goal of the tool
 
 Given a version constraint and a container image name, `fresh-container`
 determines whether the image is fresh or stale. For stale images `fresh-container`
@@ -28,7 +26,7 @@ versioning. That allows the developer to start by deploying version 1.9.0 and
 then, using `fresh-container`, be aware of patch releases of this container
 image.
 
-## Usage
+# Usage
 
 This is the simplest way to use `fresh-container`:
 
@@ -45,7 +43,7 @@ the tool will evaluate the constraint provided by the user.
 
 The tool can also provide output in json format by using the `-o json` flag.
 
-### Expressing constraint
+## Expressing constraint
 
 `fresh-container` relies on the [blang/semver](https://github.com/blang/semver)
 library.
@@ -83,7 +81,6 @@ using the following command:
 $ fresh-container check --server fresh-service.local.lan --constraint ">= 1.0.0 < 2.0.0" influxdb:1.2.3
 ```
 
-
 ## Configuration
 
 `fresh-container` has a simple json configuration file that covers the following
@@ -108,8 +105,15 @@ attributes:
 
 You can find a simple configuration under the `examples` directory.
 
-## Deployment
+# Deployment
 
 The [deployment/helm](https://github.com/flavio/fresh-container/tree/master/deployments/helm) directory includes a [helm](https://helm.sh) chart that deploys the application on top of a kubernetes cluster.
 
 The deployment happens using the [docker.io/flavio/fresh-container](https://hub.docker.com/r/flavio/fresh-container) container image that is automatically built from this repository.
+
+# Kubernetes integration
+
+Take a look at the
+[fresh-container-operator](https://github.com/flavio/fresh-container-operator)
+project to see how to find and react to stale containers inside of kubernetes
+clusters.
