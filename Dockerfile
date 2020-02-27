@@ -12,6 +12,9 @@ COPY --from=0 /fresh-container/fresh-container /app/
 WORKDIR /app
 RUN chown -R www-data:www-data *
 
+# Install certificates to reach public registries
+RUN apt-get update && apt-get install -y ca-certificates && apt-get clean
+
 ENTRYPOINT ["/app/fresh-container"]
 CMD ["server"]
 EXPOSE 5000
