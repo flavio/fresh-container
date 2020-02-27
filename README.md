@@ -108,3 +108,8 @@ attributes:
 
 You can find a simple configuration under the `examples` directory.
 
+## Deployment
+
+The [deployment/helm](https://github.com/flavio/fresh-container/tree/master/deployments/helm) directory includes a [helm](https://helm.sh) chart that deploys the application on top of a kubernetes cluster.
+
+The deployment happens using the [docker.io/flavio/fresh-container](https://hub.docker.com/r/flavio/fresh-container) container image that is automatically built from this repository.
