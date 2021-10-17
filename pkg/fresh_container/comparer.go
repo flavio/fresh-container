@@ -2,10 +2,21 @@ package fresh_container
 
 import (
 	"github.com/blang/semver"
+	"strings"
+	"fmt"
 )
 
-func NextTag(curTag, constraint string, tags []string) (string, error) {
-	curVer, err := semver.Parse(curTag)
+func NextTag(curTag, constraint string, tagPrefix string, tags []string) (string, error) {
+	trimmedTag:=strings.TrimPrefix(curTag, tagPrefix)
+	if tagPrefix!="" && trimmedTag==curTag {
+		err:=fmt.Errorf(
+				"The current tag '%s' didn't start with the tag prefix '%s'.",
+				curTag,
+				tagPrefix)
+		return "", err
+	}
+
+	curVer, err := semver.Parse(trimmedTag)
 	if err != nil {
 		return "", err
 	}
@@ -15,17 +26,17 @@ func NextTag(curTag, constraint string, tags []string) (string, error) {
 		return "", err
 	}
 
-	versions, err := TagsToVersions(tags, false)
+	versions, err := TagsToVersions(tags, tagPrefix, false)
 	if err != nil {
 		return "", err
 	}
 
-	nextVer := NextVersion(curVer, constraintRange, versions)
+	nextVer := NextVersion(curVer, constraintRange, tagPrefix, versions)
 
 	return nextVer.String(), nil
 }
 
-func NextVersion(curVer semver.Version, constraintRange semver.Range, versions semver.Versions) semver.Version {
+func NextVersion(curVer semver.Version, constraintRange semver.Range, tagPrefix string, versions semver.Versions) semver.Version {
 	nextVer := curVer
 	for _, v := range versions {
 		if constraintRange(v) {

@@ -8,8 +8,8 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func (w *BackgroundWorker) ProcessJob(ctx context.Context, id, img, constraint string) error {
-	image, err := fresh_container.NewImage(img)
+func (w *BackgroundWorker) ProcessJob(ctx context.Context, id, img, constraint string, tagPrefix string) error {
+	image, err := fresh_container.NewImage(img, tagPrefix)
 	if err != nil {
 		log.WithFields(log.Fields{
 			"id":         id,
@@ -21,7 +21,7 @@ func (w *BackgroundWorker) ProcessJob(ctx context.Context, id, img, constraint s
 	}
 
 	// reach to external registry to fetch tags
-	if err = image.FetchTags(ctx, w.config); err != nil {
+	if err = image.FetchTags(ctx, tagPrefix, w.config); err != nil {
 		log.WithFields(log.Fields{
 			"id":         id,
 			"image":      img,
@@ -54,12 +54,13 @@ func (w *BackgroundWorker) ProcessJob(ctx context.Context, id, img, constraint s
 		}).Debug("worker.ProcessJob")
 	}
 
-	evaluation, err := image.EvalUpgrade(constraint)
+	evaluation, err := image.EvalUpgrade(constraint, tagPrefix)
 	if err != nil {
 		log.WithFields(log.Fields{
 			"id":         id,
 			"image":      img,
 			"constraint": constraint,
+			"tagPrefix":  tagPrefix,
 			"error":      err,
 		}).Error("worker.ProcessJob")
 		return err
