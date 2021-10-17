@@ -20,7 +20,7 @@ func NewClient(server string) Client {
 	}
 }
 
-func (c *Client) EvalUpgrade(image, constraint string) (RemoteEvaluationResponse, error) {
+func (c *Client) EvalUpgrade(image, constraint string, tagPrefix string) (RemoteEvaluationResponse, error) {
 	u, err := url.Parse(c.Server)
 	if err != nil {
 		return RemoteEvaluationResponse{}, err
@@ -30,6 +30,7 @@ func (c *Client) EvalUpgrade(image, constraint string) (RemoteEvaluationResponse
 	q := u.Query()
 	q.Add("image", image)
 	q.Add("constraint", constraint)
+	q.Add("tagPrefix", tagPrefix)
 	u.RawQuery = q.Encode()
 
 	resp, err := http.Get(u.String())
@@ -40,6 +41,7 @@ func (c *Client) EvalUpgrade(image, constraint string) (RemoteEvaluationResponse
 	log.WithFields(log.Fields{
 		"image":      image,
 		"constraint": constraint,
+		"tagPrefix": tagPrefix,
 		"resp-code":  resp.Status,
 		"headers":    resp.Header,
 	}).Debug("Remote evaluation response")

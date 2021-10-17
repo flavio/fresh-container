@@ -17,10 +17,11 @@ func (a *ApiServer) Check(w http.ResponseWriter, r *http.Request) {
 	log.WithFields(log.Fields{
 		"image":      vars["image"],
 		"constraint": vars["constraint"],
+		"tagPrefix": vars["tagPrefix"],
 		"host":       r.Host,
 	}).Debug("GET check")
 
-	image, err := fresh_container.NewImage(vars["image"])
+	image, err := fresh_container.NewImage(vars["image"],vars["tagPrefix"])
 	if err != nil {
 		ServeErrorAsJSON(w, http.StatusBadRequest, err)
 		return
@@ -50,13 +51,13 @@ func (a *ApiServer) Check(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err = image.SetTagVersions(tags, true); err != nil {
+	if err = image.SetTagVersions(tags, vars["tagPrefix"], true); err != nil {
 		ServeErrorAsJSON(w, http.StatusInternalServerError, err)
 		return
 	}
 
-	evaluation, err := image.EvalUpgrade(vars["constraint"])
-	if err = image.SetTagVersions(tags, true); err != nil {
+	evaluation, err := image.EvalUpgrade(vars["constraint"],vars["tagPrefix"])
+	if err = image.SetTagVersions(tags, vars["tagPrefix"], true); err != nil {
 		ServeErrorAsJSON(w, http.StatusInternalServerError, err)
 		return
 	}

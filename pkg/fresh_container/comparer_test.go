@@ -5,21 +5,21 @@ import (
 )
 
 func TestNextReleaseInvalidConstraint(t *testing.T) {
-	_, err := NextTag("1.1", "> 1.0", []string{})
+	_, err := NextTag("1.1", "> 1.0", "", []string{})
 	if err == nil {
 		t.Error("Expected failure parsing invalid constraint")
 	}
 }
 
 func TestNextReleaseInvalidVersion(t *testing.T) {
-	_, err := NextTag("1.1", "> 1.1.0", []string{})
+	_, err := NextTag("1.1", "> 1.1.0",  "", []string{})
 	if err == nil {
 		t.Error("Expected failure parsing invalid version")
 	}
 }
 
 func TestNextReleaseInvalidVersions(t *testing.T) {
-	_, err := NextTag("1.1.0", "> 1.1.0", []string{"1.1"})
+	_, err := NextTag("1.1.0", "> 1.1.0", "",[]string{"1.1"})
 	if err == nil {
 		t.Error("Expected failure parsing invalid versions")
 	}
@@ -108,7 +108,7 @@ func TestNextTag(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		nextTag, err := NextTag(tc.CurTag, tc.Constraint, tc.Tags)
+		nextTag, err := NextTag(tc.CurTag, tc.Constraint, "", tc.Tags)
 		if err != nil {
 			t.Errorf("Unexpected error when handling test case %+v: %+v", tc, err)
 		}

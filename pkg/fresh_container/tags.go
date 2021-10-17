@@ -1,8 +1,10 @@
 package fresh_container
 
 import (
+	"strings"
 	"github.com/blang/semver"
 	log "github.com/sirupsen/logrus"
+	"fmt"
 )
 
 //func ImageTags(ctx context.Context, cfg *config.Config, image Image) ([]string, error) {
@@ -21,22 +23,40 @@ import (
 //  return tags, nil
 //}
 
-func TagsToVersions(tags []string, skipInvalid bool) (versions semver.Versions, err error) {
+func TagsToVersions(tags []string, tagPrefix string, skipInvalid bool) (versions semver.Versions, err error) {
 	for _, tag := range tags {
-		v, err := semver.Parse(tag)
-		if err == nil {
-			versions = append(versions, v)
-		} else if skipInvalid {
-			log.WithFields(log.Fields{
-				"tag":   tag,
-				"error": err}).Warn("Skipping image tag")
+		processedTag:=""
+		if tagPrefix=="" {
+			processedTag=tag
 		} else {
-			return semver.Versions{}, err
+			if strings.HasPrefix(tag, tagPrefix) {
+				processedTag=strings.TrimPrefix(tag, tagPrefix)
+			} else if skipInvalid {
+				log.WithFields(log.Fields{
+					"tag":   tag,
+					"tagPrefix": tagPrefix,
+					"error": fmt.Errorf("Tag Prefix missing in %s", tag)}).Warn("Tag Prefix missing")
+			} else {
+				return semver.Versions{}, fmt.Errorf("Tag Prefix missing in %s", tag)
+			}
 		}
+		if processedTag!="" {
+			v, err := semver.Parse(processedTag)
+			if err == nil {
+				versions = append(versions, v)
+			} else if skipInvalid {
+				log.WithFields(log.Fields{
+					"tag":   tag,
+					"error": err}).Warn("Skipping image tag")
+			} else {
+				return semver.Versions{}, err
+			}
+		} 
 	}
 
 	return versions, nil
 }
+
 
 //func ImageTag(img string) (semver.Version, error) {
 //  image, err := registry.ParseImage(img)
