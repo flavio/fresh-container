@@ -98,8 +98,7 @@ $ fresh-container check --constraint ">= 1.5.0 < 1.6.0" "influxdb:1.5.0"
 						Usage:   "Tag Prefix: use if the version tags have a prefix before the versioning infomation, i.e for Ubuntu-2021.10.3 use Ubuntu as a tag prefix",
 						EnvVars: []string{"FRESH_CONTAINER_TAG_PREFIX"},
 						Value:   "",
-					},
-					
+					},					
 				},
 			},
 			{
