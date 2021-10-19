@@ -11,10 +11,11 @@ import (
 
 var timeExtID int8 = -1
 
+var timePtrType = reflect.TypeOf((*time.Time)(nil))
+
 //nolint:gochecknoinits
 func init() {
-	timeType := reflect.TypeOf((*time.Time)(nil)).Elem()
-	registerExt(timeExtID, timeType, encodeTimeValue, decodeTimeValue)
+	registerExt(timeExtID, timePtrType.Elem(), encodeTimeValue, decodeTimeValue)
 }
 
 func (e *Encoder) EncodeTime(tm time.Time) error {
@@ -29,10 +30,6 @@ func (e *Encoder) EncodeTime(tm time.Time) error {
 }
 
 func (e *Encoder) encodeTime(tm time.Time) []byte {
-	if e.timeBuf == nil {
-		e.timeBuf = make([]byte, 12)
-	}
-
 	secs := uint64(tm.Unix())
 	if secs>>34 == 0 {
 		data := uint64(tm.Nanosecond())<<34 | secs
@@ -144,6 +141,9 @@ func decodeTimeValue(d *Decoder, v reflect.Value) error {
 	if err != nil {
 		return err
 	}
-	v.Set(reflect.ValueOf(tm))
+
+	ptr := v.Addr().Interface().(*time.Time)
+	*ptr = tm
+
 	return nil
 }

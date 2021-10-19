@@ -1,6 +1,7 @@
 package msgpack
 
 import (
+	"encoding"
 	"errors"
 	"fmt"
 	"reflect"
@@ -67,6 +68,9 @@ func _getDecoder(typ reflect.Type) decoderFunc {
 	if typ.Implements(unmarshalerType) {
 		return unmarshalValue
 	}
+	if typ.Implements(binaryUnmarshalerType) {
+		return unmarshalBinaryValue
+	}
 
 	// Addressable struct field value.
 	if kind != reflect.Ptr {
@@ -76,6 +80,9 @@ func _getDecoder(typ reflect.Type) decoderFunc {
 		}
 		if ptr.Implements(unmarshalerType) {
 			return unmarshalValueAddr
+		}
+		if ptr.Implements(binaryUnmarshalerType) {
+			return unmarshalBinaryValueAddr
 		}
 	}
 
@@ -104,6 +111,7 @@ func _getDecoder(typ reflect.Type) decoderFunc {
 			}
 		}
 	}
+
 	return valueDecoders[kind]
 }
 
@@ -167,23 +175,25 @@ func unmarshalValue(d *Decoder, v reflect.Value) error {
 		v.Set(reflect.New(v.Type().Elem()))
 	}
 
+	var b []byte
+
 	if d.extLen != 0 {
-		b, err := d.readN(d.extLen)
+		var err error
+		b, err = d.readN(d.extLen)
 		if err != nil {
 			return err
 		}
-		d.rec = b
 	} else {
 		d.rec = make([]byte, 0, 64)
 		if err := d.Skip(); err != nil {
 			return err
 		}
+		b = d.rec
+		d.rec = nil
 	}
 
 	unmarshaler := v.Interface().(Unmarshaler)
-	err := unmarshaler.UnmarshalMsgpack(d.rec)
-	d.rec = nil
-	return err
+	return unmarshaler.UnmarshalMsgpack(b)
 }
 
 func decodeBoolValue(d *Decoder, v reflect.Value) error {
@@ -236,4 +246,31 @@ func (d *Decoder) interfaceValue(v reflect.Value) error {
 
 func decodeUnsupportedValue(d *Decoder, v reflect.Value) error {
 	return fmt.Errorf("msgpack: Decode(unsupported %s)", v.Type())
+}
+
+//------------------------------------------------------------------------------
+
+func unmarshalBinaryValueAddr(d *Decoder, v reflect.Value) error {
+	if !v.CanAddr() {
+		return fmt.Errorf("msgpack: Decode(nonaddressable %T)", v.Interface())
+	}
+	return unmarshalBinaryValue(d, v.Addr())
+}
+
+func unmarshalBinaryValue(d *Decoder, v reflect.Value) error {
+	if d.hasNilCode() {
+		return d.decodeNilValue(v)
+	}
+
+	if v.IsNil() {
+		v.Set(reflect.New(v.Type().Elem()))
+	}
+
+	data, err := d.DecodeBytes()
+	if err != nil {
+		return err
+	}
+
+	unmarshaler := v.Interface().(encoding.BinaryUnmarshaler)
+	return unmarshaler.UnmarshalBinary(data)
 }

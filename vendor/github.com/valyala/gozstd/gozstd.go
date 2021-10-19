@@ -13,20 +13,20 @@ package gozstd
 // durting calls from Go.
 // See https://github.com/golang/go/issues/24450 .
 
-static size_t ZSTD_compressCCtx_wrapper(ZSTD_CCtx* ctx, uintptr_t dst, size_t dstCapacity, uintptr_t src, size_t srcSize, int compressionLevel) {
-    return ZSTD_compressCCtx(ctx, (void*)dst, dstCapacity, (const void*)src, srcSize, compressionLevel);
+static size_t ZSTD_compressCCtx_wrapper(uintptr_t ctx, uintptr_t dst, size_t dstCapacity, uintptr_t src, size_t srcSize, int compressionLevel) {
+    return ZSTD_compressCCtx((ZSTD_CCtx*)ctx, (void*)dst, dstCapacity, (const void*)src, srcSize, compressionLevel);
 }
 
-static size_t ZSTD_compress_usingCDict_wrapper(ZSTD_CCtx* ctx, uintptr_t dst, size_t dstCapacity, uintptr_t src, size_t srcSize, const ZSTD_CDict* cdict) {
-    return ZSTD_compress_usingCDict(ctx, (void*)dst, dstCapacity, (const void*)src, srcSize, cdict);
+static size_t ZSTD_compress_usingCDict_wrapper(uintptr_t ctx, uintptr_t dst, size_t dstCapacity, uintptr_t src, size_t srcSize, uintptr_t cdict) {
+    return ZSTD_compress_usingCDict((ZSTD_CCtx*)ctx, (void*)dst, dstCapacity, (const void*)src, srcSize, (const ZSTD_CDict*)cdict);
 }
 
-static size_t ZSTD_decompressDCtx_wrapper(ZSTD_DCtx* ctx, uintptr_t dst, size_t dstCapacity, uintptr_t src, size_t srcSize) {
-    return ZSTD_decompressDCtx(ctx, (void*)dst, dstCapacity, (const void*)src, srcSize);
+static size_t ZSTD_decompressDCtx_wrapper(uintptr_t ctx, uintptr_t dst, size_t dstCapacity, uintptr_t src, size_t srcSize) {
+    return ZSTD_decompressDCtx((ZSTD_DCtx*)ctx, (void*)dst, dstCapacity, (const void*)src, srcSize);
 }
 
-static size_t ZSTD_decompress_usingDDict_wrapper(ZSTD_DCtx* ctx, uintptr_t dst, size_t dstCapacity, uintptr_t src, size_t srcSize, const ZSTD_DDict *ddict) {
-    return ZSTD_decompress_usingDDict(ctx, (void*)dst, dstCapacity, (const void*)src, srcSize, ddict);
+static size_t ZSTD_decompress_usingDDict_wrapper(uintptr_t ctx, uintptr_t dst, size_t dstCapacity, uintptr_t src, size_t srcSize, uintptr_t ddict) {
+    return ZSTD_decompress_usingDDict((ZSTD_DCtx*)ctx, (void*)dst, dstCapacity, (const void*)src, srcSize, (const ZSTD_DDict*)ddict);
 }
 
 static unsigned long long ZSTD_getFrameContentSize_wrapper(uintptr_t src, size_t srcSize) {
@@ -66,8 +66,6 @@ func CompressDict(dst, src []byte, cd *CDict) []byte {
 }
 
 func compressDictLevel(dst, src []byte, cd *CDict, compressionLevel int) []byte {
-	concurrencyLimitCh <- struct{}{}
-
 	var cctx, cctxDict *cctxWrapper
 	if cd == nil {
 		cctx = cctxPool.Get().(*cctxWrapper)
@@ -82,9 +80,6 @@ func compressDictLevel(dst, src []byte, cd *CDict, compressionLevel int) []byte 
 	} else {
 		cctxDictPool.Put(cctxDict)
 	}
-
-	<-concurrencyLimitCh
-
 	return dst
 }
 
@@ -122,15 +117,12 @@ func compress(cctx, cctxDict *cctxWrapper, dst, src []byte, cd *CDict, compressi
 	dstLen := len(dst)
 	if cap(dst) > dstLen {
 		// Fast path - try compressing without dst resize.
-		dst = dst[:cap(dst)]
-
-		result := compressInternal(cctx, cctxDict, dst[dstLen:], src, cd, compressionLevel, false)
+		result := compressInternal(cctx, cctxDict, dst[dstLen:cap(dst)], src, cd, compressionLevel, false)
 		compressedSize := int(result)
 		if compressedSize >= 0 {
 			// All OK.
 			return dst[:dstLen+compressedSize]
 		}
-
 		if C.ZSTD_getErrorCode(result) != C.ZSTD_error_dstSize_tooSmall {
 			// Unexpected error.
 			panic(fmt.Errorf("BUG: unexpected error during compression with cd=%p: %s", cd, errStr(result)))
@@ -143,21 +135,26 @@ func compress(cctx, cctxDict *cctxWrapper, dst, src []byte, cd *CDict, compressi
 		// This should be optimized since go 1.11 - see https://golang.org/doc/go1.11#performance-compiler.
 		dst = append(dst[:cap(dst)], make([]byte, n)...)
 	}
-	dst = dst[:dstLen+compressBound]
 
-	result := compressInternal(cctx, cctxDict, dst[dstLen:], src, cd, compressionLevel, true)
+	result := compressInternal(cctx, cctxDict, dst[dstLen:dstLen+compressBound], src, cd, compressionLevel, true)
 	compressedSize := int(result)
-	return dst[:dstLen+compressedSize]
+	dst = dst[:dstLen+compressedSize]
+	if cap(dst)-len(dst) > 4096 {
+		// Re-allocate dst in order to remove superflouos capacity and reduce memory usage.
+		dst = append([]byte{}, dst...)
+	}
+	return dst
 }
 
 func compressInternal(cctx, cctxDict *cctxWrapper, dst, src []byte, cd *CDict, compressionLevel int, mustSucceed bool) C.size_t {
 	if cd != nil {
-		result := C.ZSTD_compress_usingCDict_wrapper(cctxDict.cctx,
+		result := C.ZSTD_compress_usingCDict_wrapper(
+			C.uintptr_t(uintptr(unsafe.Pointer(cctxDict.cctx))),
 			C.uintptr_t(uintptr(unsafe.Pointer(&dst[0]))),
 			C.size_t(cap(dst)),
 			C.uintptr_t(uintptr(unsafe.Pointer(&src[0]))),
 			C.size_t(len(src)),
-			cd.p)
+			C.uintptr_t(uintptr(unsafe.Pointer(cd.p))))
 		// Prevent from GC'ing of dst and src during CGO call above.
 		runtime.KeepAlive(dst)
 		runtime.KeepAlive(src)
@@ -166,7 +163,8 @@ func compressInternal(cctx, cctxDict *cctxWrapper, dst, src []byte, cd *CDict, c
 		}
 		return result
 	}
-	result := C.ZSTD_compressCCtx_wrapper(cctx.cctx,
+	result := C.ZSTD_compressCCtx_wrapper(
+		C.uintptr_t(uintptr(unsafe.Pointer(cctx.cctx))),
 		C.uintptr_t(uintptr(unsafe.Pointer(&dst[0]))),
 		C.size_t(cap(dst)),
 		C.uintptr_t(uintptr(unsafe.Pointer(&src[0]))),
@@ -190,8 +188,6 @@ func Decompress(dst, src []byte) ([]byte, error) {
 //
 // The given dictionary dd is used for the decompression.
 func DecompressDict(dst, src []byte, dd *DDict) ([]byte, error) {
-	concurrencyLimitCh <- struct{}{}
-
 	var dctx, dctxDict *dctxWrapper
 	if dd == nil {
 		dctx = dctxPool.Get().(*dctxWrapper)
@@ -207,9 +203,6 @@ func DecompressDict(dst, src []byte, dd *DDict) ([]byte, error) {
 	} else {
 		dctxDictPool.Put(dctxDict)
 	}
-
-	<-concurrencyLimitCh
-
 	return dst, err
 }
 
@@ -247,9 +240,7 @@ func decompress(dctx, dctxDict *dctxWrapper, dst, src []byte, dd *DDict) ([]byte
 	dstLen := len(dst)
 	if cap(dst) > dstLen {
 		// Fast path - try decompressing without dst resize.
-		dst = dst[:cap(dst)]
-
-		result := decompressInternal(dctx, dctxDict, dst[dstLen:], src, dd)
+		result := decompressInternal(dctx, dctxDict, dst[dstLen:cap(dst)], src, dd)
 		decompressedSize := int(result)
 		if decompressedSize >= 0 {
 			// All OK.
@@ -271,7 +262,7 @@ func decompress(dctx, dctxDict *dctxWrapper, dst, src []byte, dd *DDict) ([]byte
 	case uint64(C.ZSTD_CONTENTSIZE_UNKNOWN):
 		return streamDecompress(dst, src, dd)
 	case uint64(C.ZSTD_CONTENTSIZE_ERROR):
-		return dst, fmt.Errorf("cannod decompress invalid src")
+		return dst, fmt.Errorf("cannot decompress invalid src")
 	}
 	decompressBound++
 
@@ -279,13 +270,16 @@ func decompress(dctx, dctxDict *dctxWrapper, dst, src []byte, dd *DDict) ([]byte
 		// This should be optimized since go 1.11 - see https://golang.org/doc/go1.11#performance-compiler.
 		dst = append(dst[:cap(dst)], make([]byte, n)...)
 	}
-	dst = dst[:dstLen+decompressBound]
 
-	result := decompressInternal(dctx, dctxDict, dst[dstLen:], src, dd)
+	result := decompressInternal(dctx, dctxDict, dst[dstLen:dstLen+decompressBound], src, dd)
 	decompressedSize := int(result)
 	if decompressedSize >= 0 {
-		// All OK.
-		return dst[:dstLen+decompressedSize], nil
+		dst = dst[:dstLen+decompressedSize]
+		if cap(dst)-len(dst) > 4096 {
+			// Re-allocate dst in order to remove superflouos capacity and reduce memory usage.
+			dst = append([]byte{}, dst...)
+		}
+		return dst, nil
 	}
 
 	// Error during decompression.
@@ -295,14 +289,16 @@ func decompress(dctx, dctxDict *dctxWrapper, dst, src []byte, dd *DDict) ([]byte
 func decompressInternal(dctx, dctxDict *dctxWrapper, dst, src []byte, dd *DDict) C.size_t {
 	var n C.size_t
 	if dd != nil {
-		n = C.ZSTD_decompress_usingDDict_wrapper(dctxDict.dctx,
+		n = C.ZSTD_decompress_usingDDict_wrapper(
+			C.uintptr_t(uintptr(unsafe.Pointer(dctxDict.dctx))),
 			C.uintptr_t(uintptr(unsafe.Pointer(&dst[0]))),
 			C.size_t(cap(dst)),
 			C.uintptr_t(uintptr(unsafe.Pointer(&src[0]))),
 			C.size_t(len(src)),
-			dd.p)
+			C.uintptr_t(uintptr(unsafe.Pointer(dd.p))))
 	} else {
-		n = C.ZSTD_decompressDCtx_wrapper(dctx.dctx,
+		n = C.ZSTD_decompressDCtx_wrapper(
+			C.uintptr_t(uintptr(unsafe.Pointer(dctx.dctx))),
 			C.uintptr_t(uintptr(unsafe.Pointer(&dst[0]))),
 			C.size_t(cap(dst)),
 			C.uintptr_t(uintptr(unsafe.Pointer(&src[0]))),
@@ -313,11 +309,6 @@ func decompressInternal(dctx, dctxDict *dctxWrapper, dst, src []byte, dd *DDict)
 	runtime.KeepAlive(src)
 	return n
 }
-
-var concurrencyLimitCh = func() chan struct{} {
-	gomaxprocs := runtime.GOMAXPROCS(-1)
-	return make(chan struct{}, gomaxprocs)
-}()
 
 func errStr(result C.size_t) string {
 	errCode := C.ZSTD_getErrorCode(result)
