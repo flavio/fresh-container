@@ -51,13 +51,13 @@ func (a *ApiServer) Check(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err = image.SetTagVersions(tags, vars["tagPrefix"], true); err != nil {
+	if err = image.SetTagVersions(tags, true); err != nil {
 		ServeErrorAsJSON(w, http.StatusInternalServerError, err)
 		return
 	}
 
-	evaluation, err := image.EvalUpgrade(vars["constraint"],vars["tagPrefix"])
-	if err = image.SetTagVersions(tags, vars["tagPrefix"], true); err != nil {
+	evaluation, err := image.EvalUpgrade(vars["constraint"])
+	if err = image.SetTagVersions(tags, true); err != nil {
 		ServeErrorAsJSON(w, http.StatusInternalServerError, err)
 		return
 	}

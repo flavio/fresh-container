@@ -18,12 +18,13 @@ type Image struct {
 	registry.Image
 	TagVersion  semver.Version
 	TagVersions semver.Versions
+	TagPrefix	string
 }
 
 type ImageUpgradeEvaluationResponse struct {
 	Image          string `json:"image"`
 	Constraint     string `json:"constraint"`
-	TagPrefix     string `json:"tagPrefix"`
+	TagPrefix      string `json:"tagPrefix"`
 	CurrentVersion string `json:"current_version"`
 	NextVersion    string `json:"next_version"`
 	Stale          bool   `json:"stale"`
@@ -38,14 +39,6 @@ func NewImage(image string, tagPrefix string) (Image, error) {
 
 	curTag:=img.Tag
 	trimmedTag:=strings.TrimPrefix(curTag, tagPrefix)
-	if tagPrefix!="" && trimmedTag==curTag {
-		err:=fmt.Errorf(
-				"The current tag '%s' didn't start with the tag prefix '%s'.",
-				curTag,
-				tagPrefix)
-		return Image{}, err
-	}
-
 
 	version, err := semver.Parse(trimmedTag)
 	if err != nil {
@@ -55,6 +48,7 @@ func NewImage(image string, tagPrefix string) (Image, error) {
 	return Image{
 		TagVersion: version,
 		Image:      img,
+		TagPrefix:	tagPrefix,
 	}, nil
 }
 
@@ -63,7 +57,7 @@ func NewImage(image string, tagPrefix string) (Image, error) {
 // The tags are automatically converted to semver.Version objects
 // and stored into the `TagVersions` field.
 // Note well: invalid tags are going to be ignored.
-func (image *Image) FetchTags(ctx context.Context, tagPrefix string, cfg *config.Config) error {
+func (image *Image) FetchTags(ctx context.Context, cfg *config.Config) error {
 	var err error
 
 	// Create the registry client.
@@ -78,13 +72,13 @@ func (image *Image) FetchTags(ctx context.Context, tagPrefix string, cfg *config
 	}
 	sort.Strings(tags)
 
-	return image.SetTagVersions(tags, tagPrefix, true)
+	return image.SetTagVersions(tags, true)
 }
 
-func (image *Image) SetTagVersions(tags []string, tagPrefix string, skipInvalid bool) error {
+func (image *Image) SetTagVersions(tags []string, skipInvalid bool) error {
 	var err error
 
-	image.TagVersions, err = TagsToVersions(tags, tagPrefix, skipInvalid)
+	image.TagVersions, err = TagsToVersions(tags, image.TagPrefix, skipInvalid)
 	return err
 }
 
@@ -92,7 +86,7 @@ func (image *Image) FullNameWithoutTag() string {
 	return fmt.Sprintf("%s/%s", image.Domain, image.Path)
 }
 
-func (image *Image) EvalUpgrade(constraint string, tagPrefix string) (ImageUpgradeEvaluationResponse, error) {
+func (image *Image) EvalUpgrade(constraint string) (ImageUpgradeEvaluationResponse, error) {
 
 	constraintRange, err := semver.ParseRange(constraint)
 	if err != nil {
@@ -102,17 +96,17 @@ func (image *Image) EvalUpgrade(constraint string, tagPrefix string) (ImageUpgra
 	nextVer := NextVersion(
 		image.TagVersion,
 		constraintRange,
-		tagPrefix,
+		image.TagPrefix,
 		image.TagVersions,
 	)
 
 	return ImageUpgradeEvaluationResponse{
 		Image:          image.FullNameWithoutTag(),
 		Constraint:     constraint,
-		TagPrefix:		tagPrefix,
+		TagPrefix:		image.TagPrefix,
 		Stale:          nextVer.GT(image.TagVersion),
 		CurrentVersion: image.Tag,
-		NextVersion:    tagPrefix+nextVer.String(),
+		NextVersion:    nextVer.String(),
 	}, nil
 }
 

@@ -53,7 +53,6 @@ func TagsToVersions(tags []string, tagPrefix string, skipInvalid bool) (versions
 			}
 		} 
 	}
-
 	return versions, nil
 }
 

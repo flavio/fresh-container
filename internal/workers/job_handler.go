@@ -21,7 +21,7 @@ func (w *BackgroundWorker) ProcessJob(ctx context.Context, id, img, constraint s
 	}
 
 	// reach to external registry to fetch tags
-	if err = image.FetchTags(ctx, tagPrefix, w.config); err != nil {
+	if err = image.FetchTags(ctx, w.config); err != nil {
 		log.WithFields(log.Fields{
 			"id":         id,
 			"image":      img,
@@ -54,7 +54,7 @@ func (w *BackgroundWorker) ProcessJob(ctx context.Context, id, img, constraint s
 		}).Debug("worker.ProcessJob")
 	}
 
-	evaluation, err := image.EvalUpgrade(constraint, tagPrefix)
+	evaluation, err := image.EvalUpgrade(constraint)
 	if err != nil {
 		log.WithFields(log.Fields{
 			"id":         id,

@@ -114,12 +114,12 @@ func localEvaluation(image, constraint, tagPrefix string, configFile string, ctx
 		return
 	}
 
-	err = img.FetchTags(ctx, tagPrefix, &cfg)
+	err = img.FetchTags(ctx, &cfg)
 	if err != nil {
 		return
 	}
 
-	return img.EvalUpgrade(constraint, tagPrefix)
+	return img.EvalUpgrade(constraint)
 }
 
 func remoteEvaluation(server, image, constraint string, tagPrefix string, showProgress bool) (evaluation fresh_container.ImageUpgradeEvaluationResponse, err error) {
