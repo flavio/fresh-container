@@ -76,9 +76,14 @@ func CheckImage(c *cli.Context) error {
 	switch output {
 	case "text":
 		if !evaluation.Stale {
-			fmt.Printf(
-				"%s is already the latest version available that satisfies the %s constraint and the tag prefix %s\n",
-				evaluation.Image, evaluation.Constraint, evaluation.TagPrefix)
+			msg := fmt.Sprintf(
+				"%s is already the latest version available that satisfies the %s constraint",
+				evaluation.Image,
+				evaluation.Constraint)
+			if evaluation.TagPrefix != "" {
+				msg = fmt.Sprintf(" %s and the tag prefix %s", msg, evaluation.TagPrefix)
+			}
+			fmt.Println(msg)
 		} else {
 			err := fmt.Errorf(
 				"The '%s' container image can be upgraded from the '%s' tag to the '%s' one and still satisfy the '%s' constraint.",
@@ -100,7 +105,7 @@ func CheckImage(c *cli.Context) error {
 	return nil
 }
 
-func localEvaluation(image, constraint, tagPrefix string, configFile string, ctx context.Context) (evaluation fresh_container.ImageUpgradeEvaluationResponse, err error) {
+func localEvaluation(image, constraint, tagPrefix, configFile string, ctx context.Context) (evaluation fresh_container.ImageUpgradeEvaluationResponse, err error) {
 	cfg := config.NewConfig()
 	if configFile != "" {
 		cfg, err = config.NewFromFile(configFile)
@@ -122,7 +127,7 @@ func localEvaluation(image, constraint, tagPrefix string, configFile string, ctx
 	return img.EvalUpgrade(constraint)
 }
 
-func remoteEvaluation(server, image, constraint string, tagPrefix string, showProgress bool) (evaluation fresh_container.ImageUpgradeEvaluationResponse, err error) {
+func remoteEvaluation(server, image, constraint, tagPrefix string, showProgress bool) (evaluation fresh_container.ImageUpgradeEvaluationResponse, err error) {
 	client := fresh_container.NewClient(server)
 	remoteEval, err := client.EvalUpgrade(image, constraint, tagPrefix)
 	if err != nil {
