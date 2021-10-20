@@ -8,7 +8,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func (w *BackgroundWorker) ProcessJob(ctx context.Context, id, img, constraint string, tagPrefix string) error {
+func (w *BackgroundWorker) ProcessJob(ctx context.Context, id, img, constraint, tagPrefix string) error {
 	image, err := fresh_container.NewImage(img, tagPrefix)
 	if err != nil {
 		log.WithFields(log.Fields{

@@ -5,8 +5,8 @@ import (
 	"strings"
 )
 
-func NextTag(curTag, constraint string, tagPrefix string, tags []string) (string, error) {
-	trimmedTag:=strings.TrimPrefix(curTag, tagPrefix)
+func NextTag(curTag, constraint, tagPrefix string, tags []string) (string, error) {
+	trimmedTag := strings.TrimPrefix(curTag, tagPrefix)
 
 	curVer, err := semver.Parse(trimmedTag)
 	if err != nil {

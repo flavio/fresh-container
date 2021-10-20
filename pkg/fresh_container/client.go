@@ -20,7 +20,7 @@ func NewClient(server string) Client {
 	}
 }
 
-func (c *Client) EvalUpgrade(image, constraint string, tagPrefix string) (RemoteEvaluationResponse, error) {
+func (c *Client) EvalUpgrade(image, constraint, tagPrefix string) (RemoteEvaluationResponse, error) {
 	u, err := url.Parse(c.Server)
 	if err != nil {
 		return RemoteEvaluationResponse{}, err
@@ -41,7 +41,7 @@ func (c *Client) EvalUpgrade(image, constraint string, tagPrefix string) (Remote
 	log.WithFields(log.Fields{
 		"image":      image,
 		"constraint": constraint,
-		"tagPrefix": tagPrefix,
+		"tagPrefix":  tagPrefix,
 		"resp-code":  resp.Status,
 		"headers":    resp.Header,
 	}).Debug("Remote evaluation response")

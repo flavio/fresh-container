@@ -18,7 +18,7 @@ type Image struct {
 	registry.Image
 	TagVersion  semver.Version
 	TagVersions semver.Versions
-	TagPrefix	string
+	TagPrefix   string
 }
 
 type ImageUpgradeEvaluationResponse struct {
@@ -30,15 +30,15 @@ type ImageUpgradeEvaluationResponse struct {
 	Stale          bool   `json:"stale"`
 }
 
-func NewImage(image string, tagPrefix string) (Image, error) {
+func NewImage(image, tagPrefix string) (Image, error) {
 	img, err := registry.ParseImage(image)
 
 	if err != nil {
 		return Image{}, err
 	}
 
-	curTag:=img.Tag
-	trimmedTag:=strings.TrimPrefix(curTag, tagPrefix)
+	curTag := img.Tag
+	trimmedTag := strings.TrimPrefix(curTag, tagPrefix)
 
 	version, err := semver.Parse(trimmedTag)
 	if err != nil {
@@ -48,7 +48,7 @@ func NewImage(image string, tagPrefix string) (Image, error) {
 	return Image{
 		TagVersion: version,
 		Image:      img,
-		TagPrefix:	tagPrefix,
+		TagPrefix:  tagPrefix,
 	}, nil
 }
 
@@ -87,7 +87,6 @@ func (image *Image) FullNameWithoutTag() string {
 }
 
 func (image *Image) EvalUpgrade(constraint string) (ImageUpgradeEvaluationResponse, error) {
-
 	constraintRange, err := semver.ParseRange(constraint)
 	if err != nil {
 		return ImageUpgradeEvaluationResponse{}, err
@@ -103,7 +102,7 @@ func (image *Image) EvalUpgrade(constraint string) (ImageUpgradeEvaluationRespon
 	return ImageUpgradeEvaluationResponse{
 		Image:          image.FullNameWithoutTag(),
 		Constraint:     constraint,
-		TagPrefix:		image.TagPrefix,
+		TagPrefix:      image.TagPrefix,
 		Stale:          nextVer.GT(image.TagVersion),
 		CurrentVersion: image.Tag,
 		NextVersion:    nextVer.String(),
