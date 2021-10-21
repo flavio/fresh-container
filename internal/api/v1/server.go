@@ -15,7 +15,7 @@ import (
 )
 
 type ApiServer struct {
-	backgrondWorker *workers.BackgroundWorker
+	backgroundWorker *workers.BackgroundWorker
 	db              *db.DB
 	cfg             *config.Config
 	port            int
@@ -24,7 +24,7 @@ type ApiServer struct {
 
 func NewApiServer(bw *workers.BackgroundWorker, db *db.DB, port int, cfg *config.Config) (*ApiServer, error) {
 	api := ApiServer{
-		backgrondWorker: bw,
+		backgroundWorker: bw,
 		cfg:             cfg,
 		port:            port,
 		router:          mux.NewRouter(),
@@ -50,6 +50,7 @@ func (a *ApiServer) initRoutes() {
 		Queries(
 			"image", "{image}",
 			"constraint", "{constraint}",
+			"tagPrefix", "{tagPrefix}",
 		).HandlerFunc(a.Check)
 
 	a.router.

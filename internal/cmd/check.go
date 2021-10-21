@@ -24,7 +24,6 @@ func isOutputFormatValid(format string) bool {
 			return true
 		}
 	}
-
 	return false
 }
 
@@ -110,18 +109,18 @@ func localEvaluation(image, constraint, tagPrefix, configFile string, ctx contex
 	if configFile != "" {
 		cfg, err = config.NewFromFile(configFile)
 		if err != nil {
-			return
+			return fresh_container.ImageUpgradeEvaluationResponse{}, err
 		}
 	}
 
 	img, err := fresh_container.NewImage(image, tagPrefix)
 	if err != nil {
-		return
+		return fresh_container.ImageUpgradeEvaluationResponse{}, err
 	}
 
 	err = img.FetchTags(ctx, &cfg)
 	if err != nil {
-		return
+		return fresh_container.ImageUpgradeEvaluationResponse{}, err
 	}
 
 	return img.EvalUpgrade(constraint)
@@ -131,7 +130,7 @@ func remoteEvaluation(server, image, constraint, tagPrefix string, showProgress 
 	client := fresh_container.NewClient(server)
 	remoteEval, err := client.EvalUpgrade(image, constraint, tagPrefix)
 	if err != nil {
-		return
+		return fresh_container.ImageUpgradeEvaluationResponse{}, err
 	}
 
 	ready, err := remoteEval.IsReady()
@@ -143,7 +142,7 @@ func remoteEvaluation(server, image, constraint, tagPrefix string, showProgress 
 		time.Sleep(1 * time.Second)
 		ready, err = remoteEval.IsReady()
 		if err != nil {
-			return
+			return fresh_container.ImageUpgradeEvaluationResponse{}, err
 		}
 
 		if ready {

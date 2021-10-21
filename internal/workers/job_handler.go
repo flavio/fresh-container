@@ -15,6 +15,7 @@ func (w *BackgroundWorker) ProcessJob(ctx context.Context, id, img, constraint, 
 			"id":         id,
 			"image":      img,
 			"constraint": constraint,
+			"tagPrefix":  tagPrefix,
 			"error":      err,
 		}).Error("worker.ProcessJob")
 		return err
@@ -26,6 +27,7 @@ func (w *BackgroundWorker) ProcessJob(ctx context.Context, id, img, constraint, 
 			"id":         id,
 			"image":      img,
 			"constraint": constraint,
+			"tagPrefix":  tagPrefix,
 			"error":      err,
 		}).Error("worker.ProcessJob")
 		return err
@@ -41,6 +43,7 @@ func (w *BackgroundWorker) ProcessJob(ctx context.Context, id, img, constraint, 
 			"id":         id,
 			"image":      img,
 			"constraint": constraint,
+			"tagPrefix":  tagPrefix,
 			"error":      err,
 		}).Error("worker.ProcessJob")
 		return err
@@ -50,6 +53,7 @@ func (w *BackgroundWorker) ProcessJob(ctx context.Context, id, img, constraint, 
 			"id":         id,
 			"image":      img,
 			"constraint": constraint,
+			"tagPrefix":  tagPrefix,
 			"tags":       tagsString,
 		}).Debug("worker.ProcessJob")
 	}
@@ -72,6 +76,7 @@ func (w *BackgroundWorker) ProcessJob(ctx context.Context, id, img, constraint, 
 			"id":         id,
 			"image":      img,
 			"constraint": constraint,
+			"tagPrefix":  tagPrefix,
 			"error":      err,
 		}).Error("worker.ProcessJob")
 		return err
@@ -82,6 +87,7 @@ func (w *BackgroundWorker) ProcessJob(ctx context.Context, id, img, constraint, 
 			"id":         id,
 			"image":      img,
 			"constraint": constraint,
+			"tagPrefix":  tagPrefix,
 			"error":      err,
 		}).Error("worker.ProcessJob")
 		return err
