@@ -83,6 +83,10 @@ go-version-check:
 	@[ $(GO_VERSION_MAJ) -ge 2 ] || \
 		[ $(GO_VERSION_MAJ) -eq 1 -a $(GO_VERSION_MIN) -ge 12 ] || (echo "FATAL: Go version should be >= 1.12.x" ; exit 1 ; )
 
+.PHONY: fmt
+gofmt:
+	$(GOFMT) -d $(FRESH_CONTAINER_MONITOR_SRCS)
+
 .PHONY: lint
 lint: deps
 	# explicitly enable GO111MODULE otherwise go mod will fail
