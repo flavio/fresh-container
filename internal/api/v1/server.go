@@ -44,7 +44,6 @@ func (a *ApiServer) ListenAndServe() error {
 }
 
 func (a *ApiServer) initRoutes() {
-
 	a.router.
 		Path("/api/v1/check").
 		Methods("GET").
