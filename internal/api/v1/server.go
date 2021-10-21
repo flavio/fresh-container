@@ -16,19 +16,19 @@ import (
 
 type ApiServer struct {
 	backgroundWorker *workers.BackgroundWorker
-	db              *db.DB
-	cfg             *config.Config
-	port            int
-	router          *mux.Router
+	db               *db.DB
+	cfg              *config.Config
+	port             int
+	router           *mux.Router
 }
 
 func NewApiServer(bw *workers.BackgroundWorker, db *db.DB, port int, cfg *config.Config) (*ApiServer, error) {
 	api := ApiServer{
 		backgroundWorker: bw,
-		cfg:             cfg,
-		port:            port,
-		router:          mux.NewRouter(),
-		db:              db,
+		cfg:              cfg,
+		port:             port,
+		router:           mux.NewRouter(),
+		db:               db,
 	}
 	api.initRoutes()
 
