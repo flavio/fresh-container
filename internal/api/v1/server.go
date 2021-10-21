@@ -44,6 +44,16 @@ func (a *ApiServer) ListenAndServe() error {
 }
 
 func (a *ApiServer) initRoutes() {
+
+	a.router.
+		Path("/api/v1/check").
+		Methods("GET").
+		Queries(
+			"image", "{image}",
+			"constraint", "{constraint}",
+		).HandlerFunc(a.Check)
+
+	// Registering the handler twice seems to be the easiest way to have an option query
 	a.router.
 		Path("/api/v1/check").
 		Methods("GET").

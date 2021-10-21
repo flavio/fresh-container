@@ -94,7 +94,7 @@ $ fresh-container check --constraint ">= 1.5.0 < 1.6.0" "influxdb:1.5.0"
 					},
 					&cli.StringFlag{
 						Name:    "tagPrefix",
-						Usage:   "Tag Prefix: use if the version tags have a prefix before the versioning infomation, i.e for Ubuntu-2021.10.3 use Ubuntu as a tag prefix",
+						Usage:   "Tag Prefix: use if the version tags from the repository have a prefix before the versioning infomation, i.e for Ubuntu-2021.10.3 use Ubuntu- as a tag prefix.  Only tags starting with the specificed prefix will be considered",
 						EnvVars: []string{"FRESH_CONTAINER_TAG_PREFIX"},
 					},
 				},
@@ -113,7 +113,12 @@ $ fresh-container check --constraint ">= 1.5.0 < 1.6.0" "influxdb:1.5.0"
 						Usage:   "Listen to port",
 						EnvVars: []string{"FRESH_CONTAINER_SERVER_PORT"},
 					},
-				},
+					&cli.BoolFlag{
+						Name:    "debug",
+						Aliases: []string{"d"},
+						Usage:   "Set log level to debug",
+						EnvVars: []string{"FRESH_CONTAINER_SERVER_DEBUG"},
+					}},
 			},
 		},
 	}
