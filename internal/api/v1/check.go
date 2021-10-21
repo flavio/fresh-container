@@ -41,7 +41,7 @@ func (a *ApiServer) Check(w http.ResponseWriter, r *http.Request) {
 
 	if len(tags) == 0 {
 		// No tags - queue the job
-		id, err := a.backgrondWorker.AddJob(vars["image"], vars["constraint"])
+		id, err := a.backgrondWorker.AddJob(vars["image"], vars["constraint"], vars["tagPrefix"])
 		if err != nil {
 			ServeErrorAsJSON(w, http.StatusInternalServerError, err)
 			return

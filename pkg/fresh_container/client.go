@@ -30,7 +30,9 @@ func (c *Client) EvalUpgrade(image, constraint, tagPrefix string) (RemoteEvaluat
 	q := u.Query()
 	q.Add("image", image)
 	q.Add("constraint", constraint)
-	q.Add("tagPrefix", tagPrefix)
+	if tagPrefix != "" {
+		q.Add("tagPrefix", tagPrefix)
+	}
 	u.RawQuery = q.Encode()
 
 	resp, err := http.Get(u.String())
