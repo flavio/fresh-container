@@ -20,13 +20,13 @@ type BackgroundWorker struct {
 	task         *taskq.Task
 }
 
-func (w *BackgroundWorker) AddJob(image, constraint string) (string, error) {
+func (w *BackgroundWorker) AddJob(image, constraint, tagPrefix string) (string, error) {
 	id, err := uuid.NewRandom()
 	if err != nil {
 		return "", err
 	}
 
-	if err = w.queue.Add(w.task.WithArgs(w.ctx, id.String(), image, constraint)); err != nil {
+	if err = w.queue.Add(w.task.WithArgs(w.ctx, id.String(), image, constraint, tagPrefix)); err != nil {
 		return "", err
 	}
 	if err := w.db.SetJobQueued(id.String()); err != nil {

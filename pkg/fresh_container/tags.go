@@ -3,6 +3,7 @@ package fresh_container
 import (
 	"github.com/blang/semver"
 	log "github.com/sirupsen/logrus"
+	"strings"
 )
 
 //func ImageTags(ctx context.Context, cfg *config.Config, image Image) ([]string, error) {
@@ -21,20 +22,23 @@ import (
 //  return tags, nil
 //}
 
-func TagsToVersions(tags []string, skipInvalid bool) (versions semver.Versions, err error) {
+func TagsToVersions(tags []string, tagPrefix string, skipInvalid bool) (versions semver.Versions, err error) {
 	for _, tag := range tags {
-		v, err := semver.Parse(tag)
-		if err == nil {
-			versions = append(versions, v)
-		} else if skipInvalid {
-			log.WithFields(log.Fields{
-				"tag":   tag,
-				"error": err}).Warn("Skipping image tag")
-		} else {
-			return semver.Versions{}, err
+		if tagPrefix == "" || strings.HasPrefix(tag, tagPrefix) { // only consider tags that have the specified prefix
+			tag = strings.TrimPrefix(tag, tagPrefix)
+			v, err := semver.Parse(tag)
+			if err == nil {
+				versions = append(versions, v)
+			} else if skipInvalid {
+				log.WithFields(log.Fields{
+					"tag":       tag,
+					"tagPrefix": tagPrefix,
+					"error":     err}).Warn("Skipping image tag")
+			} else {
+				return semver.Versions{}, err
+			}
 		}
 	}
-
 	return versions, nil
 }
 

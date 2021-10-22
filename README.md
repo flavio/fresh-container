@@ -78,7 +78,7 @@ The `fresh-container` binary can perform a request against a remote server by
 using the following command:
 
 ```bash
-$ fresh-container check --server fresh-service.local.lan --constraint ">= 1.0.0 < 2.0.0" influxdb:1.2.3
+$ fresh-container check --server "http://fresh-service.local.lan:5000" --constraint ">= 1.0.0 < 2.0.0" influxdb:1.2.3
 ```
 
 ## Configuration

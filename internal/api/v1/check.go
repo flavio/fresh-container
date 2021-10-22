@@ -17,10 +17,11 @@ func (a *ApiServer) Check(w http.ResponseWriter, r *http.Request) {
 	log.WithFields(log.Fields{
 		"image":      vars["image"],
 		"constraint": vars["constraint"],
+		"tagPrefix":  vars["tagPrefix"],
 		"host":       r.Host,
 	}).Debug("GET check")
 
-	image, err := fresh_container.NewImage(vars["image"])
+	image, err := fresh_container.NewImage(vars["image"], vars["tagPrefix"])
 	if err != nil {
 		ServeErrorAsJSON(w, http.StatusBadRequest, err)
 		return
@@ -40,7 +41,7 @@ func (a *ApiServer) Check(w http.ResponseWriter, r *http.Request) {
 
 	if len(tags) == 0 {
 		// No tags - queue the job
-		id, err := a.backgrondWorker.AddJob(vars["image"], vars["constraint"])
+		id, err := a.backgroundWorker.AddJob(vars["image"], vars["constraint"], vars["tagPrefix"])
 		if err != nil {
 			ServeErrorAsJSON(w, http.StatusInternalServerError, err)
 			return

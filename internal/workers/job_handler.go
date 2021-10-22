@@ -8,13 +8,14 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func (w *BackgroundWorker) ProcessJob(ctx context.Context, id, img, constraint string) error {
-	image, err := fresh_container.NewImage(img)
+func (w *BackgroundWorker) ProcessJob(ctx context.Context, id, img, constraint, tagPrefix string) error {
+	image, err := fresh_container.NewImage(img, tagPrefix)
 	if err != nil {
 		log.WithFields(log.Fields{
 			"id":         id,
 			"image":      img,
 			"constraint": constraint,
+			"tagPrefix":  tagPrefix,
 			"error":      err,
 		}).Error("worker.ProcessJob")
 		return err
@@ -26,6 +27,7 @@ func (w *BackgroundWorker) ProcessJob(ctx context.Context, id, img, constraint s
 			"id":         id,
 			"image":      img,
 			"constraint": constraint,
+			"tagPrefix":  tagPrefix,
 			"error":      err,
 		}).Error("worker.ProcessJob")
 		return err
@@ -41,6 +43,7 @@ func (w *BackgroundWorker) ProcessJob(ctx context.Context, id, img, constraint s
 			"id":         id,
 			"image":      img,
 			"constraint": constraint,
+			"tagPrefix":  tagPrefix,
 			"error":      err,
 		}).Error("worker.ProcessJob")
 		return err
@@ -50,6 +53,7 @@ func (w *BackgroundWorker) ProcessJob(ctx context.Context, id, img, constraint s
 			"id":         id,
 			"image":      img,
 			"constraint": constraint,
+			"tagPrefix":  tagPrefix,
 			"tags":       tagsString,
 		}).Debug("worker.ProcessJob")
 	}
@@ -60,6 +64,7 @@ func (w *BackgroundWorker) ProcessJob(ctx context.Context, id, img, constraint s
 			"id":         id,
 			"image":      img,
 			"constraint": constraint,
+			"tagPrefix":  tagPrefix,
 			"error":      err,
 		}).Error("worker.ProcessJob")
 		return err
@@ -71,6 +76,7 @@ func (w *BackgroundWorker) ProcessJob(ctx context.Context, id, img, constraint s
 			"id":         id,
 			"image":      img,
 			"constraint": constraint,
+			"tagPrefix":  tagPrefix,
 			"error":      err,
 		}).Error("worker.ProcessJob")
 		return err
@@ -81,6 +87,7 @@ func (w *BackgroundWorker) ProcessJob(ctx context.Context, id, img, constraint s
 			"id":         id,
 			"image":      img,
 			"constraint": constraint,
+			"tagPrefix":  tagPrefix,
 			"error":      err,
 		}).Error("worker.ProcessJob")
 		return err

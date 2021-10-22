@@ -15,20 +15,20 @@ import (
 )
 
 type ApiServer struct {
-	backgrondWorker *workers.BackgroundWorker
-	db              *db.DB
-	cfg             *config.Config
-	port            int
-	router          *mux.Router
+	backgroundWorker *workers.BackgroundWorker
+	db               *db.DB
+	cfg              *config.Config
+	port             int
+	router           *mux.Router
 }
 
 func NewApiServer(bw *workers.BackgroundWorker, db *db.DB, port int, cfg *config.Config) (*ApiServer, error) {
 	api := ApiServer{
-		backgrondWorker: bw,
-		cfg:             cfg,
-		port:            port,
-		router:          mux.NewRouter(),
-		db:              db,
+		backgroundWorker: bw,
+		cfg:              cfg,
+		port:             port,
+		router:           mux.NewRouter(),
+		db:               db,
 	}
 	api.initRoutes()
 
@@ -50,6 +50,16 @@ func (a *ApiServer) initRoutes() {
 		Queries(
 			"image", "{image}",
 			"constraint", "{constraint}",
+		).HandlerFunc(a.Check)
+
+	// Registering the handler twice seems to be the easiest way to have an option query
+	a.router.
+		Path("/api/v1/check").
+		Methods("GET").
+		Queries(
+			"image", "{image}",
+			"constraint", "{constraint}",
+			"tagPrefix", "{tagPrefix}",
 		).HandlerFunc(a.Check)
 
 	a.router.
