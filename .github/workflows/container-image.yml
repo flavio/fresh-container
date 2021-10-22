@@ -38,7 +38,7 @@ jobs:
           platforms: linux/amd64, linux/arm64
           push: true
           tags: |
-            ghcr.io/pgautier/fresh-container:latest
+            ghcr.io/flavio/fresh-container:latest
       -
         name: Retrieve tag name
         if: ${{ startsWith(github.ref, 'refs/tags/') }}
@@ -54,4 +54,4 @@ jobs:
           platforms: linux/amd64, linux/arm64
           push: true
           tags: |
-            ghcr.io/pgautier/fresh-container:${{ env.TAG_NAME }}
+            ghcr.io/flavio/fresh-container:${{ env.TAG_NAME }}
