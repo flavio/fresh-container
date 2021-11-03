@@ -14,7 +14,7 @@ func (d *DB) GetImageTags(image fresh_container.Image) ([]string, error) {
 	var tags []string
 
 	err := d.db.View(func(txn *badger.Txn) error {
-		item, err := txn.Get([]byte(image.FullNameWithoutTag()))
+		item, err := txn.Get([]byte(image.FullNameWithoutTag() + image.TagPrefix))
 		if err != nil {
 			if err == badger.ErrKeyNotFound {
 				return nil
@@ -55,7 +55,7 @@ func (d *DB) SetImageTags(image fresh_container.Image, tags []string) error {
 	}
 
 	return d.db.Update(func(txn *badger.Txn) error {
-		entry := badger.NewEntry([]byte(image.FullNameWithoutTag()), marshalledTags).
+		entry := badger.NewEntry([]byte(image.FullNameWithoutTag()+image.TagPrefix), marshalledTags).
 			WithTTL(time.Duration(d.config.CacheTTLHours) * time.Hour)
 		return txn.SetEntry(entry)
 	})

@@ -14,14 +14,17 @@ import (
 func (a *ApiServer) Check(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 
+	// tagPrefix is optional so have to retrieve it explicitely
+	tagPrefix := r.URL.Query().Get("tagPrefix")
+
 	log.WithFields(log.Fields{
 		"image":      vars["image"],
 		"constraint": vars["constraint"],
-		"tagPrefix":  vars["tagPrefix"],
+		"tagPrefix":  tagPrefix,
 		"host":       r.Host,
 	}).Debug("GET check")
 
-	image, err := fresh_container.NewImage(vars["image"], vars["tagPrefix"])
+	image, err := fresh_container.NewImage(vars["image"], tagPrefix)
 	if err != nil {
 		ServeErrorAsJSON(w, http.StatusBadRequest, err)
 		return
@@ -41,7 +44,7 @@ func (a *ApiServer) Check(w http.ResponseWriter, r *http.Request) {
 
 	if len(tags) == 0 {
 		// No tags - queue the job
-		id, err := a.backgroundWorker.AddJob(vars["image"], vars["constraint"], vars["tagPrefix"])
+		id, err := a.backgroundWorker.AddJob(vars["image"], vars["constraint"], tagPrefix)
 		if err != nil {
 			ServeErrorAsJSON(w, http.StatusInternalServerError, err)
 			return
