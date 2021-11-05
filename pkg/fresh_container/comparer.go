@@ -18,17 +18,17 @@ func NextTag(curTag, constraint, tagPrefix string, tags []string) (string, error
 		return "", err
 	}
 
-	versions, err := TagsToVersions(tags, tagPrefix, false)
+	versions, err := TagsToVersions(tags, tagPrefix, false, true)
 	if err != nil {
 		return "", err
 	}
 
-	nextVer := NextVersion(curVer, constraintRange, tagPrefix, versions)
+	nextVer := NextVersion(curVer, constraintRange, versions)
 
-	return tagPrefix+nextVer.String(), nil
+	return tagPrefix + nextVer.String(), nil
 }
 
-func NextVersion(curVer semver.Version, constraintRange semver.Range, tagPrefix string, versions semver.Versions) semver.Version {
+func NextVersion(curVer semver.Version, constraintRange semver.Range, versions semver.Versions) semver.Version {
 	nextVer := curVer
 	for _, v := range versions {
 		if constraintRange(v) {

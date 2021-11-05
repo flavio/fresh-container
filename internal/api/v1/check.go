@@ -54,16 +54,13 @@ func (a *ApiServer) Check(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err = image.SetTagVersions(tags, true); err != nil {
+	// prefixes have already been stripped since we got this from cache
+	if err = image.SetTagVersions(tags, true, true); err != nil {
 		ServeErrorAsJSON(w, http.StatusInternalServerError, err)
 		return
 	}
 
 	evaluation, err := image.EvalUpgrade(vars["constraint"])
-	if err = image.SetTagVersions(tags, true); err != nil {
-		ServeErrorAsJSON(w, http.StatusInternalServerError, err)
-		return
-	}
 
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(http.StatusOK)

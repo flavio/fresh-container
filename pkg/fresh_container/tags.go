@@ -22,9 +22,10 @@ import (
 //  return tags, nil
 //}
 
-func TagsToVersions(tags []string, tagPrefix string, skipInvalid bool) (versions semver.Versions, err error) {
+func TagsToVersions(tags []string, tagPrefix string, skipInvalid bool, prefixAlreadyStripped bool) (versions semver.Versions, err error) {
 	for _, tag := range tags {
-		if tagPrefix == "" || strings.HasPrefix(tag, tagPrefix) { // only consider tags that have the specified prefix
+		if prefixAlreadyStripped || tagPrefix == "" || strings.HasPrefix(tag, tagPrefix) {
+			// only consider tags that have the specified prefix
 			tag = strings.TrimPrefix(tag, tagPrefix)
 			v, err := semver.Parse(tag)
 			if err == nil {
