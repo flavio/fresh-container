@@ -25,7 +25,7 @@ func NextTag(curTag, constraint, tagPrefix string, tags []string) (string, error
 
 	nextVer := NextVersion(curVer, constraintRange, tagPrefix, versions)
 
-	return nextVer.String(), nil
+	return tagPrefix+nextVer.String(), nil
 }
 
 func NextVersion(curVer semver.Version, constraintRange semver.Range, tagPrefix string, versions semver.Versions) semver.Version {

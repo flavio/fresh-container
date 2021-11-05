@@ -118,7 +118,7 @@ func TestNextTag(t *testing.T) {
 				"alpine-2.0.3",
 			},
 			TagPrefix:   "alpine-",
-			ExpectedTag: "1.5.6",
+			ExpectedTag: "alpine-1.5.6",
 		},
 		NextTagTestCase{
 			CurTag:     "1.3.1",
@@ -132,7 +132,7 @@ func TestNextTag(t *testing.T) {
 				"alpine-2.0.3",
 			},
 			TagPrefix:   "alpine-",
-			ExpectedTag: "1.3.1",
+			ExpectedTag: "alpine-1.3.1",
 		},
 	}
 
