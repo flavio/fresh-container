@@ -74,7 +74,7 @@ func (a *ApiServer) initRoutes() {
 func ServeErrorAsJSON(w http.ResponseWriter, statusCode int, err error) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(statusCode)
-	log.Errorf("Encoutered error: %s", err)
+	log.Errorf("Encountered error: %s", err)
 	msg := struct {
 		Error error
 	}{
