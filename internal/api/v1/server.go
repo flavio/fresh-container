@@ -76,9 +76,9 @@ func ServeErrorAsJSON(w http.ResponseWriter, statusCode int, err error) error {
 	w.WriteHeader(statusCode)
 	log.Errorf("Encountered error: %s", err)
 	msg := struct {
-		Error error
+		Error string
 	}{
-		err,
+		fmt.Sprintf("%s", err),
 	}
 	return json.NewEncoder(w).Encode(msg)
 }
