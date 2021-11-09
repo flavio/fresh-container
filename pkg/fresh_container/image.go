@@ -57,6 +57,7 @@ func NewImage(image, tagPrefix string) (Image, error) {
 // The tags are automatically converted to semver.Version objects
 // and stored into the `TagVersions` field.
 // Note well: invalid tags are going to be ignored.
+// and only tags matching the prefix if there is one are included
 func (image *Image) FetchTags(ctx context.Context, cfg *config.Config) error {
 	var err error
 
@@ -72,13 +73,13 @@ func (image *Image) FetchTags(ctx context.Context, cfg *config.Config) error {
 	}
 	sort.Strings(tags)
 
-	return image.SetTagVersions(tags, true)
+	return image.SetTagVersions(tags, true, false) // prefixes will be stripped on this call
 }
 
-func (image *Image) SetTagVersions(tags []string, skipInvalid bool) error {
+func (image *Image) SetTagVersions(tags []string, skipInvalid bool, prefixAlreadyStripped bool) error {
 	var err error
 
-	image.TagVersions, err = TagsToVersions(tags, image.TagPrefix, skipInvalid)
+	image.TagVersions, err = TagsToVersions(tags, image.TagPrefix, skipInvalid, prefixAlreadyStripped)
 	return err
 }
 
@@ -95,7 +96,6 @@ func (image *Image) EvalUpgrade(constraint string) (ImageUpgradeEvaluationRespon
 	nextVer := NextVersion(
 		image.TagVersion,
 		constraintRange,
-		image.TagPrefix,
 		image.TagVersions,
 	)
 
@@ -105,7 +105,7 @@ func (image *Image) EvalUpgrade(constraint string) (ImageUpgradeEvaluationRespon
 		TagPrefix:      image.TagPrefix,
 		Stale:          nextVer.GT(image.TagVersion),
 		CurrentVersion: image.Tag,
-		NextVersion:    nextVer.String(),
+		NextVersion:    image.TagPrefix + nextVer.String(),
 	}, nil
 }
 

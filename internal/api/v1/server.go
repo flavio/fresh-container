@@ -12,6 +12,8 @@ import (
 
 	gorilla_handlers "github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
+
+	log "github.com/sirupsen/logrus"
 )
 
 type ApiServer struct {
@@ -44,22 +46,13 @@ func (a *ApiServer) ListenAndServe() error {
 }
 
 func (a *ApiServer) initRoutes() {
-	a.router.
-		Path("/api/v1/check").
-		Methods("GET").
-		Queries(
-			"image", "{image}",
-			"constraint", "{constraint}",
-		).HandlerFunc(a.Check)
 
-	// Registering the handler twice seems to be the easiest way to have an option query
 	a.router.
 		Path("/api/v1/check").
 		Methods("GET").
 		Queries(
 			"image", "{image}",
 			"constraint", "{constraint}",
-			"tagPrefix", "{tagPrefix}",
 		).HandlerFunc(a.Check)
 
 	a.router.
@@ -81,11 +74,11 @@ func (a *ApiServer) initRoutes() {
 func ServeErrorAsJSON(w http.ResponseWriter, statusCode int, err error) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(statusCode)
-
+	log.Errorf("Encountered error: %s", err)
 	msg := struct {
-		Error error
+		Error string
 	}{
-		err,
+		fmt.Sprintf("%s", err),
 	}
 	return json.NewEncoder(w).Encode(msg)
 }

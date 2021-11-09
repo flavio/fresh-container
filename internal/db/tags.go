@@ -14,7 +14,10 @@ func (d *DB) GetImageTags(image fresh_container.Image) ([]string, error) {
 	var tags []string
 
 	err := d.db.View(func(txn *badger.Txn) error {
-		item, err := txn.Get([]byte(image.FullNameWithoutTag()))
+		// adding the tag prefix add the end makes the cache per tag prefix, which is correct
+		// behavior.  Note that the version tags are stored without the prefix when there is one
+		// to make the semver code easier to run.
+		item, err := txn.Get([]byte(image.FullNameWithoutTag() + image.TagPrefix))
 		if err != nil {
 			if err == badger.ErrKeyNotFound {
 				return nil
@@ -44,6 +47,10 @@ func (d *DB) GetImageTags(image fresh_container.Image) ([]string, error) {
 
 func (d *DB) SetImageTags(image fresh_container.Image, tags []string) error {
 	marshalledTags, err := json.Marshal(tags)
+	log.WithFields(log.Fields{
+		"image": image.FullNameWithoutTag(),
+		"tags":  tags,
+	}).Debug("db.SetImageTags")
 	if err != nil {
 		log.WithFields(log.Fields{
 			"image": image.FullNameWithoutTag(),
@@ -55,7 +62,7 @@ func (d *DB) SetImageTags(image fresh_container.Image, tags []string) error {
 	}
 
 	return d.db.Update(func(txn *badger.Txn) error {
-		entry := badger.NewEntry([]byte(image.FullNameWithoutTag()), marshalledTags).
+		entry := badger.NewEntry([]byte(image.FullNameWithoutTag()+image.TagPrefix), marshalledTags).
 			WithTTL(time.Duration(d.config.CacheTTLHours) * time.Hour)
 		return txn.SetEntry(entry)
 	})
